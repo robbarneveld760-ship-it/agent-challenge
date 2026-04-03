@@ -324,10 +324,89 @@ const checkStakeAction: Action = {
 // ============================================================
 // PLUGIN EXPORT
 // ============================================================
+
+// ============================================================
+// ACTION: Token Price Lookup (via Jupiter)
+// ============================================================
+const priceCheckAction: Action = {
+  name: "CHECK_TOKEN_PRICE",
+  description: "Check the current price of a Solana token using Jupiter price API. Supports SOL, USDC, BONK, JUP, and any token by mint address.",
+  similes: ["TOKEN_PRICE", "PRICE_CHECK", "HOW_MUCH", "WHAT_PRICE", "SOL_PRICE", "CURRENT_PRICE"],
+  validate: async (_runtime: IAgentRuntime, message: Memory) => {
+    const text = (message.content.text || "").toLowerCase();
+    return text.includes("price") || text.includes("worth") || text.includes("cost") || text.includes("how much");
+  },
+  handler: async (_runtime: IAgentRuntime, message: Memory, _state?: State, _options?: unknown, callback?: HandlerCallback) => {
+    const text = (message.content.text || "").toUpperCase();
+    
+    // Map common names to mint addresses
+    const tokenMap: Record<string, string> = {
+      "SOL": "So11111111111111111111111111111111111111112",
+      "USDC": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "USDT": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+      "BONK": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "JUP": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+      "MSOL": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+      "JITOSOL": "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
+      "RENDER": "rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof",
+      "WIF": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+      "PYTH": "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3",
+    };
+
+    // Find which tokens to look up
+    const tokensToCheck: string[] = [];
+    const tokenNames: string[] = [];
+    
+    for (const [name, mint] of Object.entries(tokenMap)) {
+      if (text.includes(name)) {
+        tokensToCheck.push(mint);
+        tokenNames.push(name);
+      }
+    }
+    
+    // Also check for raw mint addresses
+    const mintMatch = message.content.text?.match(/[1-9A-HJ-NP-Za-km-z]{32,44}/);
+    if (mintMatch && !tokensToCheck.includes(mintMatch[0])) {
+      tokensToCheck.push(mintMatch[0]);
+      tokenNames.push(shorten(mintMatch[0]));
+    }
+
+    // Default to SOL if nothing specific mentioned
+    if (tokensToCheck.length === 0) {
+      tokensToCheck.push(tokenMap["SOL"]);
+      tokenNames.push("SOL");
+    }
+
+    try {
+      const ids = tokensToCheck.join(",");
+      const resp = await fetch(`https://api.jup.ag/price/v2?ids=${ids}`);
+      const data = (await resp.json()) as { data: Record<string, { price: string }> };
+
+      let output = `💲 **Token Prices**\n\n`;
+      for (let i = 0; i < tokensToCheck.length; i++) {
+        const priceData = data.data[tokensToCheck[i]];
+        if (priceData) {
+          const price = parseFloat(priceData.price);
+          output += `• **${tokenNames[i]}**: $${price < 0.01 ? price.toFixed(8) : price.toFixed(2)}\n`;
+        } else {
+          output += `• **${tokenNames[i]}**: Price not available\n`;
+        }
+      }
+      output += `\n_Prices via Jupiter aggregator — live market data_`;
+      if (callback) await callback({ text: output });
+    } catch (err) {
+      if (callback) await callback({ text: `⚠️ Error fetching prices: ${(err as Error).message}` });
+    }
+  },
+  examples: [
+    [ex("{{user1}}", "What's the price of SOL?"), ex("SolSentry", "💲 Token Prices\n\n• SOL: $78.50", "CHECK_TOKEN_PRICE")],
+  ],
+};
+
 export const customPlugin: Plugin = {
   name: "solsentry-plugin",
-  description: "SolSentry — Personal Solana blockchain monitor with wallet tracking, token balances, transaction history, staking info, and network status.",
-  actions: [checkBalanceAction, getTokensAction, getTransactionsAction, getAccountInfoAction, networkStatusAction, checkStakeAction],
+  description: "SolSentry — Personal Solana blockchain monitor with wallet tracking, token balances, transaction history, staking, network status, and live prices.",
+  actions: [checkBalanceAction, getTokensAction, getTransactionsAction, getAccountInfoAction, networkStatusAction, checkStakeAction, priceCheckAction],
   providers: [],
   evaluators: [],
 };
