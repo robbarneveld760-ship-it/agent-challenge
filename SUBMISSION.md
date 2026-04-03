@@ -17,7 +17,7 @@ SolSentry is a personal Solana blockchain assistant that monitors wallets, track
 - **Staking Monitor** — Active delegations with validator info
 
 **Technical highlights:**
-- Custom ElizaOS v2 plugin with 6 on-chain actions
+- Custom ElizaOS v2 plugin with 7 blockchain actions
 - Zero third-party API dependencies — all data from Solana mainnet RPC
 - Known-token registry for human-readable token labels
 - Parallel RPC queries for network status (4 concurrent calls)

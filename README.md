@@ -33,6 +33,7 @@ This is what personal AI should look like: **your tools, running on your infrast
 | `GET_ACCOUNT_INFO` | Account type, owner program, rent status |
 | `SOLANA_NETWORK_STATUS` | Current slot, epoch progress, TPS, supply stats |
 | `CHECK_STAKE_ACCOUNTS` | Active stake delegations and validator info |
+| `CHECK_TOKEN_PRICE` | Live token prices via Jupiter aggregator |
 
 All actions query the Solana mainnet RPC directly. No API keys required. No rate limits hit for normal usage.
 
@@ -94,7 +95,7 @@ The agent uses:
 - **ElizaOS v2** for the conversational framework and plugin system
 - **Qwen3.5-27B** hosted on Nosana for natural language understanding
 - **Solana JSON-RPC** for all blockchain data (no third-party APIs)
-- **Custom plugin** (`src/index.ts`) with 6 on-chain actions
+- **Custom plugin** (`src/index.ts`) with 7 blockchain actions
 
 ### Known Token Registry
 
