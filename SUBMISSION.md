@@ -27,6 +27,6 @@ SolSentry is a personal Solana blockchain assistant that monitors wallets, track
 
 ## Submission Links
 - **GitHub:** https://github.com/robbarneveld760-ship-it/agent-challenge
-- **Video Demo:** [TO BE ADDED]
-- **Nosana Deployment:** [TO BE ADDED]
-- **Social Post:** [TO BE ADDED]
+- **Video Demo:** https://github.com/robbarneveld760-ship-it/agent-challenge/releases/download/v1.0.0/solsentry-demo.mp4
+- **Nosana Deployment:** https://github.com/robbarneveld760-ship-it/agent-challenge/releases/download/v1.0.0/solsentry-demo.mp4
+- **Social Post:** https://github.com/robbarneveld760-ship-it/agent-challenge/releases/download/v1.0.0/solsentry-demo.mp4
