@@ -3,7 +3,7 @@
     {
       "id": "solsentry",
       "args": {
-        "image": "robbarneveld760/solsentry:latest",
+        "image": "ghcr.io/robbarneveld760-ship-it/solsentry:latest",
         "expose": 3000,
         "env": {
           "OPENAI_API_KEY": "nosana",
